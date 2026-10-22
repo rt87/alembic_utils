@@ -14,6 +14,34 @@ from alembic_utils.statement import (
 )
 
 
+def _split_top_level_commas(text: str) -> List[str]:
+    """Split a parameter list on the commas between parameters
+
+    Commas inside brackets, parentheses or quotes belong to a default value, such as array['a', 'b'], and are kept.
+    """
+    parts: List[str] = []
+    current = ""
+    depth = 0
+    quote = ""
+    for char in text:
+        if quote:
+            if char == quote:
+                quote = ""
+        elif char in "'\"":
+            quote = char
+        elif char in "([":
+            depth += 1
+        elif char in ")]":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(current)
+            current = ""
+            continue
+        current += char
+    parts.append(current)
+    return parts
+
+
 class PGFunction(ReplaceableEntity):
     """A PostgreSQL Function compatible with `alembic revision --autogenerate`
 
@@ -87,8 +115,7 @@ class PGFunction(ReplaceableEntity):
             function_name = result["function_name"].strip()
             parameters_str = ""
 
-        # NOTE: Will fail if a text field has a default and that deafult contains a comma...
-        parameters: List[str] = parameters_str.split(",")
+        parameters: List[str] = _split_top_level_commas(parameters_str)
         parameters = [x[: len(x.lower().split("default")[0])] for x in parameters]
         parameters = [x.strip() for x in parameters]
         drop_params = ", ".join(parameters)
