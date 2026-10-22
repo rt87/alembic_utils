@@ -10,33 +10,9 @@ from alembic_utils.statement import (
     escape_colon_for_plpgsql,
     escape_colon_for_sql,
     normalize_whitespace,
+    split_top_level_commas,
     strip_terminating_semicolon,
 )
-
-
-def _split_top_level_commas(text: str) -> List[str]:
-    """Splits on commas that are not inside brackets, parentheses or quotes"""
-    parts: List[str] = []
-    current = ""
-    depth = 0
-    quote = ""
-    for char in text:
-        if quote:
-            if char == quote:
-                quote = ""
-        elif char in "'\"":
-            quote = char
-        elif char in "([":
-            depth += 1
-        elif char in ")]":
-            depth -= 1
-        elif char == "," and depth == 0:
-            parts.append(current)
-            current = ""
-            continue
-        current += char
-    parts.append(current)
-    return parts
 
 
 class PGFunction(ReplaceableEntity):
@@ -112,7 +88,7 @@ class PGFunction(ReplaceableEntity):
             function_name = result["function_name"].strip()
             parameters_str = ""
 
-        parameters: List[str] = _split_top_level_commas(parameters_str)
+        parameters: List[str] = split_top_level_commas(parameters_str)
         parameters = [x[: len(x.lower().split("default")[0])] for x in parameters]
         parameters = [x.strip() for x in parameters]
         drop_params = ", ".join(parameters)
