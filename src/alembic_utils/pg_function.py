@@ -15,10 +15,7 @@ from alembic_utils.statement import (
 
 
 def _split_top_level_commas(text: str) -> List[str]:
-    """Split a parameter list on the commas between parameters
-
-    Commas inside brackets, parentheses or quotes belong to a default value, such as array['a', 'b'], and are kept.
-    """
+    """Splits on commas that are not inside brackets, parentheses or quotes"""
     parts: List[str] = []
     current = ""
     depth = 0

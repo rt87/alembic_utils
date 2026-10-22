@@ -34,7 +34,11 @@ def test_drop_handles_commas_inside_array_default(engine) -> None:
     # A comma inside an array default is not a parameter separator
     commas = PGFunction(
         schema="public",
-        signature="commas(id_columns text[], ignore_columns text[] default array ['branch_id', 'commit_id_from'], out table_diff jsonb)",
+        signature=(
+            "commas(id_columns text[], "
+            "ignore_columns text[] default array ['branch_id', 'commit_id_from'], "
+            "out table_diff jsonb)"
+        ),
         definition="""
             language sql
             as
