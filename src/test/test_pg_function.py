@@ -31,7 +31,7 @@ def test_trailing_whitespace_stripped():
 
 
 def test_drop_keeps_parameter_names_containing_default():
-    # Parameter names such as default_arr contain "default" and must not be cut short in the drop statement
+    # Parameter names such as default_arr contain "default" and must survive the drop statement
     defaulted = PGFunction(
         schema="public",
         signature="defaulted(default_arr jsonb, default_text text = 'x', arr jsonb default '[]')",
